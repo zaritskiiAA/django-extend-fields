@@ -33,9 +33,7 @@ class TestOverrideQuerySetInterface:
         try:
             obj_after_update = Question.objects.get(id=obj_with_trans_field.id)
         except Question.DoesNotExist:
-            raise AssertionError(
-                'After query update object does not exists.'
-            )
+            raise AssertionError('After query update object does not exists.')
 
         assert getattr(obj_with_trans_field, to_attribute(attr)) != getattr(
             obj_after_update, to_attribute(attr)
