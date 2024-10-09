@@ -10,6 +10,7 @@ from django.db.models.fields import Field
 from django.utils.functional import lazy
 from django.utils.text import capfirst
 from django.db.models.manager import Manager
+from pydantic import BaseModel
 
 
 _show_suffix = ContextVar("show_suffix")
@@ -31,6 +32,28 @@ class AbstractExtendField(ABC):
     @abstractmethod
     def to_attribute(name: str, suffix: str | None = None) -> str:
         pass
+
+
+class AutoConvert:
+
+    def __init__(self, converter: Callable[..., BaseModel], suffix: list[str]) -> None:
+
+        self.converter = converter
+        self.suffix = suffix
+
+
+class ConverterMixin:
+
+    def _create_auto_property(self, converter_data) -> None:
+
+        self._auto = True
+
+        def fget(self):
+
+            if hasattr(self, '_auto'):
+                return AutoConvert(*converter_data)
+
+        setattr(self.__class__, 'auto', property(fget=fget))
 
 
 class ExtendField(AbstractExtendField):
@@ -67,6 +90,7 @@ class ExtendField(AbstractExtendField):
     def contribute_to_class(self, model_cls: Model, name: str) -> None:
 
         _n, _p, args, kwargs = self._field.deconstruct()
+        self.attrname = name
         fields = []
         verbose_name = kwargs.pop("verbose_name", name)
         for index, suffix in enumerate(self.attr_suffix):
@@ -137,7 +161,6 @@ class ExtendModelOptions:
     def _set_descriptor_to_django_model_meta(cls, model_cls):
 
         opts, name = cls.models_data[model_cls]['opts'], cls.models_data[model_cls]['extend_field']
-        print(opts, name)
         opts._property_names = frozenset(prop for prop in list(opts._property_names) + [name])
 
     @classmethod
@@ -146,6 +169,14 @@ class ExtendModelOptions:
         from .exceptions import ManagerBuilderExceptions, warning_message
 
         opts = cls.models_data[model_cls]['opts']
+
+        if orm_proxy := cls.models_data[model_cls]['orm_proxy_method']:
+            pass
+        else:
+            raise ValueError(
+                'If you override django orm in ExtendMeta, ExtendModelOptions '
+                'must get orm_proxy method. In default its extends.fields._to_orm.'
+            )
         if ManagerBuilder := getattr(cls, 'manager_builder', None):
 
             builder = ManagerBuilder()
@@ -161,22 +192,11 @@ class ExtendModelOptions:
                 opts.local_managers = [
                     manag for manag in opts.local_managers if manag.name != 'objects'
                 ]
+            setattr(m, 'orm_proxy', orm_proxy)
             m.contribute_to_class(model_cls, 'objects')
-
             warning_message(f'Override django "objects" manager for {model_cls}.')
             return
         raise ManagerBuilderExceptions('ManagerBuilder does not exists.')
-
-    @staticmethod
-    def _set_proxy_orm(extend_obj: ExtendField) -> Callable[..., Any]:
-        # FIXME: Crutch!
-        # In order to have space for set "proxy orm setter" individually.
-        # TODO: Add the ability to use custom proxying. May be in ExtendMeta.
-        import importlib
-
-        module_name = extend_obj.__module__
-        module = importlib.import_module(module_name)
-        setattr(extend_obj, 'proxy_from_orm', module.proxy_from_orm)
 
     @staticmethod
     def _find_extend_meta(model_cls: Model) -> ExtendMetaBase:
@@ -206,6 +226,7 @@ class ExtendModelOptions:
         model_cls: Model,
         extend_field: str,
         extend_obj: ExtendField,
+        orm_proxy: Callable[..., Any] = None,
     ) -> None:
 
         if model_cls not in cls.models_data and cls.models_data:
@@ -218,6 +239,7 @@ class ExtendModelOptions:
                 "extend_obj": extend_obj,
                 "opts": model_cls._meta,
                 "extend_meta": extend_meta,
+                "orm_proxy_method": orm_proxy,
             }
             if extend_meta and extend_meta.meta.override_query:
                 cls._create_manager(model_cls)
@@ -232,6 +254,5 @@ class ExtendModelOptions:
         opts = cls.models_data[model_cls]["opts"]
 
         if hasattr(opts, "extend_descriptor"):
-            cls._set_proxy_orm(extend_obj)
             cls._set_descriptor_to_django_model_meta(model_cls)
             opts.extend_descriptor[extend_field] = extend_obj

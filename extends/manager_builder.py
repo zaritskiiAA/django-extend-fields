@@ -1,6 +1,7 @@
 import inspect
 from typing import Any
 from functools import wraps
+from collections import defaultdict
 
 from django.db.models.manager import Manager
 
@@ -8,33 +9,29 @@ from django.db.models.manager import Manager
 class TranslatedManagerWorkPiece:
 
     def update(self: Manager, **kwargs) -> int:
-        translated_data, rest_data, desc = self._prepare_data(**kwargs)
+        desc_kwargs, kwargs = self._prepare_data(**kwargs)
 
         # You need to explicitly pass the type and object to "super" signature.
         # If do not, python by default take type from workpiece class.
         final_call = super(self.__class__, self).update
 
-        return desc.proxy_from_orm(
-            translated_data,
-            final_call,
-            **rest_data,
-        )
+        return self.orm_proxy(desc_kwargs, final_call, **kwargs)
 
     def _prepare_data(self: Manager, *args, **kwargs) -> dict[str, str] | dict[str, Any]:
 
         model_cls = self.model
         descriptors = model_cls._meta.extend_descriptor
-        filter_args, filter_kwargs = [], {}
+        filter_args, desc_kwargs = [], defaultdict(dict)
 
         for name, desc in descriptors.items():
             if name in kwargs:
-                if hasattr(desc, 'auto'):
-                    # TODO: заготовка к авто-траслитированию.
-                    pass
+                if hasattr(desc, '_auto'):
+                    value, suffix = kwargs.pop(name), desc.auto.suffix
+                    for suf in suffix:
+                        desc_kwargs[desc].update({desc.to_attribute(name, suffix=suf): value})
                 else:
-                    filter_kwargs[desc.to_attribute(name)] = kwargs.pop(name)
-
-        return filter_kwargs, kwargs, desc
+                    desc_kwargs[desc].update({desc.to_attribute(name): kwargs.pop(name)})
+        return desc_kwargs, kwargs
 
     @classmethod
     def get_override_workpiece_methods(cls) -> dict:
