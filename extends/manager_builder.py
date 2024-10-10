@@ -18,7 +18,7 @@ class TranslatedManagerWorkPiece:
         return self.orm_proxy(desc_kwargs, final_call, **kwargs)
 
     def _prepare_data(self: Manager, *args, **kwargs) -> dict[str, str] | dict[str, Any]:
-        
+
         model_cls = self.model
         descriptors = model_cls._meta.extend_descriptor
         filter_args, desc_kwargs = [], defaultdict(dict)
@@ -26,7 +26,7 @@ class TranslatedManagerWorkPiece:
         for name, desc in descriptors.items():
             if name in kwargs:
                 value = kwargs.pop(name)
-                
+
                 for v in desc.validators:
                     v.validate(value)
 

@@ -75,7 +75,7 @@ class TranslatedField(ExtendFieldDescriptor, ConverterMixin):
             self._create_auto_property(auto)
 
     def _create_auto_property(self, converter_data) -> None:
-        
+
         conv = converter_data[0]() if converter_data[0] else None
         suffix = converter_data[1] or self.attr_suffix
         super()._create_auto_property((conv, suffix))

@@ -74,7 +74,8 @@ class DeeplTranslator(TranslatorBase, ApiHandler):
             # TODO: сделать метод с re.
             target_lang = (
                 target_lang.replace("_", "-")
-                if "_" in target_lang else target_lang.replace("-", "_")
+                if "_" in target_lang
+                else target_lang.replace("-", "_")
             )
             if deepl_lang_code := self._get_language_mapper().get(target_lang):
                 pass

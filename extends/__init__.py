@@ -6,8 +6,12 @@ except ModuleNotFoundError:  # pragma: no cover
 else:
     from .fields import TranslatedField  # noqa
     from .bases import ExtendField, ExtendMetaBase, ConverterMixin, AutoConvert  # noqa
-    from .opportunity import ( # noqa
-        TextResultModel, DeeplTranslator, get_translator, # noqa
-        LangsModel, AWSLanguageDetector, get_detector, # noqa
+    from .opportunity import (  # noqa
+        TextResultModel,
+        DeeplTranslator,
+        get_translator,  # noqa
+        LangsModel,
+        AWSLanguageDetector,
+        get_detector,  # noqa
     )
-    from .validators import Validator # noqa
+    from .validators import Validator  # noqa

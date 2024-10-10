@@ -145,7 +145,8 @@ class ExtendFieldDescriptor(ExtendField):
         self._setter = self._attrsetter(name, field=self)
 
     def _set_validators(
-        self, validators: dict[str | Callable[..., None] | object, Any] | None = None,
+        self,
+        validators: dict[str | Callable[..., None] | object, Any] | None = None,
     ) -> None:
 
         v: list[Validator] | list = ValidatorsFabric.generate_validators(validators)

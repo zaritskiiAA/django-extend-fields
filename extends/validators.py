@@ -21,21 +21,19 @@ class Validator(AbstractValidator):
 
     def validate(self, data: Any, *args, **kwargs) -> Any:
         raise NotImplementedError('Override this method in Validator child.')
-    
+
     def _validate(self, data: Any, *args, **kwargs) -> Any:
         raise NotImplementedError('Override this method in Validator child.')
-    
+
 
 class ValidatorsFabric:
 
     def generate_validators(
-        self, validators: dict[str | Callable[..., None] | object, Any] | None = None,
+        self,
+        validators: dict[str | Callable[..., None] | object, Any] | None = None,
     ) -> list[Validator] | list:
-        
+
         if validators:
             pass
         else:
             return []
-        
-
-

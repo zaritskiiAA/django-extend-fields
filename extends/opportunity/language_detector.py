@@ -65,12 +65,13 @@ class AWSLanguageDetector(LanguageDetectorBase, ApiHandler):
 
         response = self.make_request(Text=text)
         return self.validate_response(response.get('Languages'))
-    
+
 
 def get_detector(
-    client_name: str = "comprehend", region_name: str = "us-east-1",
+    client_name: str = "comprehend",
+    region_name: str = "us-east-1",
 ) -> AWSLanguageDetector:
-    
+
     if not client_name or not region_name:
         raise ValueError(
             (
@@ -78,7 +79,7 @@ def get_detector(
                 f'Hand over in get_detector signature or accept the default.'
             )
         )
-    
+
     required_env = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]
 
     if pub_key := os.getenv("AWS_ACCESS_KEY_ID"):
@@ -90,9 +91,12 @@ def get_detector(
     if not required_env:
 
         import boto3
+
         client = boto3.client(
-            client_name, region_name=region_name, 
-            aws_access_key_id=pub_key, aws_secret_access_key=secret_key,
+            client_name,
+            region_name=region_name,
+            aws_access_key_id=pub_key,
+            aws_secret_access_key=secret_key,
         )
         return AWSLanguageDetector(client)
     raise AttributeError(f'{required_env} not found in env params.')

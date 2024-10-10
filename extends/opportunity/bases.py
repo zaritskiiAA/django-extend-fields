@@ -16,7 +16,7 @@ class LanguageDetectorBase(ABC):
     @abstractmethod
     def detect_languages(self, text: str) -> BaseModel:
         pass
-    
+
 
 class ApiHandler(ABC):
 
