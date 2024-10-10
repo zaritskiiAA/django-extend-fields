@@ -21,9 +21,13 @@ def translated_attrgetter(name, field):
 def translated_attrsetter(name, field):
 
     def _setter(self, value):
+
+        for v in field.validators:
+            v.validate(value)
+
         if hasattr(field, '_auto'):
             for suf in field.auto.suffix:
-                convert_value = field.auto.converter(value, suf).text
+                convert_value = field.auto.converter.translate_text(value, suf).text
                 setattr(self, to_attribute(name, suf), convert_value)
         else:
             setattr(self, to_attribute(name), value)
@@ -38,7 +42,7 @@ def _to_orm(desc_kwargs: dict[str, str], orm_call: Callable[..., Any], *args, **
         for raw_field, value in raw_data.items():
             if hasattr(desc, '_auto'):
                 suf = raw_field.replace(f'{desc.attrname}_', "")
-                convert_kwargs[raw_field] = desc.auto.converter(value, suf).text
+                convert_kwargs[raw_field] = desc.auto.converter.translate_text(value, suf).text
         kwargs.update(convert_kwargs)
     return orm_call(*args, **kwargs)
 
@@ -54,6 +58,7 @@ class TranslatedField(ExtendFieldDescriptor, ConverterMixin):
         attrgetter=translated_attrgetter,
         attrsetter=translated_attrsetter,
         auto=None,
+        validators=None,
     ) -> None:
 
         attr_suffix = list(attr_suffix or (lang[0] for lang in settings.LANGUAGES))
@@ -64,21 +69,16 @@ class TranslatedField(ExtendFieldDescriptor, ConverterMixin):
             attr_suffix=attr_suffix,
             attrgetter=attrgetter,
             attrsetter=attrsetter,
+            validators=validators,
         )
         if auto:
             self._create_auto_property(auto)
 
     def _create_auto_property(self, converter_data) -> None:
 
-        converter, suffix = converter_data
-
-        if converter.__name__ == "get_translator" and "DeeplTranslator" in converter.__doc__:
-            converter = converter().translate_text
-
-        suffix = suffix or self.attr_suffix
-        converter_data = converter, suffix
-
-        super()._create_auto_property(converter_data)
+        conv = converter_data[0]() if converter_data[0] else None
+        suffix = converter_data[1] or self.attr_suffix
+        super()._create_auto_property((conv, suffix))
 
     def to_attribute(self, name: str, suffix: str | None = None) -> str:
         return to_attribute(name, language_code=suffix)

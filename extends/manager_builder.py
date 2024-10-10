@@ -25,12 +25,16 @@ class TranslatedManagerWorkPiece:
 
         for name, desc in descriptors.items():
             if name in kwargs:
+                value = kwargs.pop(name)
+
+                for v in desc.validators:
+                    v.validate(value)
+
                 if hasattr(desc, '_auto'):
-                    value, suffix = kwargs.pop(name), desc.auto.suffix
-                    for suf in suffix:
+                    for suf in desc.auto.suffix:
                         desc_kwargs[desc].update({desc.to_attribute(name, suffix=suf): value})
                 else:
-                    desc_kwargs[desc].update({desc.to_attribute(name): kwargs.pop(name)})
+                    desc_kwargs[desc].update({desc.to_attribute(name): value})
         return desc_kwargs, kwargs
 
     @classmethod
