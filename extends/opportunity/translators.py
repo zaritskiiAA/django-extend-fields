@@ -74,8 +74,7 @@ class DeeplTranslator(TranslatorBase, ApiHandler):
             # TODO: сделать метод с re.
             target_lang = (
                 target_lang.replace("_", "-")
-                if "_" in target_lang
-                else target_lang.replace("-", "_")  # noqa E501
+                if "_" in target_lang else target_lang.replace("-", "_")
             )
             if deepl_lang_code := self._get_language_mapper().get(target_lang):
                 pass
@@ -89,7 +88,7 @@ class DeeplTranslator(TranslatorBase, ApiHandler):
         return self.validate_response(response)
 
 
-def get_translator():
+def get_translator() -> DeeplTranslator:
     """Used it in your ExtendField parametrs if you need DeeplTranslator."""
 
     if key := os.getenv("DEEPL_TRANSLATOR_KEY"):

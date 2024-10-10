@@ -18,19 +18,23 @@ class TranslatedManagerWorkPiece:
         return self.orm_proxy(desc_kwargs, final_call, **kwargs)
 
     def _prepare_data(self: Manager, *args, **kwargs) -> dict[str, str] | dict[str, Any]:
-
+        
         model_cls = self.model
         descriptors = model_cls._meta.extend_descriptor
         filter_args, desc_kwargs = [], defaultdict(dict)
 
         for name, desc in descriptors.items():
             if name in kwargs:
+                value = kwargs.pop(name)
+                
+                for v in desc.validators:
+                    v.validate(value)
+
                 if hasattr(desc, '_auto'):
-                    value, suffix = kwargs.pop(name), desc.auto.suffix
-                    for suf in suffix:
+                    for suf in desc.auto.suffix:
                         desc_kwargs[desc].update({desc.to_attribute(name, suffix=suf): value})
                 else:
-                    desc_kwargs[desc].update({desc.to_attribute(name): kwargs.pop(name)})
+                    desc_kwargs[desc].update({desc.to_attribute(name): value})
         return desc_kwargs, kwargs
 
     @classmethod

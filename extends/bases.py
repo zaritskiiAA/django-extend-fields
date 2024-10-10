@@ -12,6 +12,8 @@ from django.utils.text import capfirst
 from django.db.models.manager import Manager
 from pydantic import BaseModel
 
+from .validators import Validator, ValidatorsFabric
+
 
 _show_suffix = ContextVar("show_suffix")
 
@@ -51,7 +53,12 @@ class ConverterMixin:
         def fget(self):
 
             if hasattr(self, '_auto'):
-                return AutoConvert(*converter_data)
+                if conv := converter_data[0] or getattr(self, 'converter', None):
+                    return AutoConvert(conv, converter_data[1])
+                raise AttributeError(
+                    'Converter does not exists. Specify converter object'
+                    ' in auto params or ExtendMeta attr.'
+                )
 
         setattr(self.__class__, 'auto', property(fget=fget))
 
@@ -120,12 +127,14 @@ class ExtendFieldDescriptor(ExtendField):
         attr_suffix=None,
         attrgetter=None,
         attrsetter=None,
+        validators=None,
     ) -> None:
 
         super().__init__(field, specific, attr_suffix=attr_suffix)
 
         self._attrgetter = attrgetter
         self._attrsetter = attrsetter
+        self._set_validators(validators)
 
     def contribute_to_class(self, model_cls: Model, name: str) -> None:
         super().contribute_to_class(model_cls, name)
@@ -134,6 +143,13 @@ class ExtendFieldDescriptor(ExtendField):
 
         self._getter = self._attrgetter(name, field=self)
         self._setter = self._attrsetter(name, field=self)
+
+    def _set_validators(
+        self, validators: dict[str | Callable[..., None] | object, Any] | None = None,
+    ) -> None:
+
+        v: list[Validator] | list = ValidatorsFabric.generate_validators(validators)
+        setattr(self, 'validators', v)
 
     def __get__(self, obj, objtype=None):
         if obj is None:
@@ -147,6 +163,7 @@ class ExtendFieldDescriptor(ExtendField):
 class ExtendMetaBase:
 
     override_query: bool = False
+    converter: Callable[[str, str], str] | object | None = None
 
 
 class ExtendModelOptions:
@@ -252,6 +269,17 @@ class ExtendModelOptions:
             )
 
         opts = cls.models_data[model_cls]["opts"]
+        extend_meta = cls.models_data[model_cls]["extend_meta"]
+
+        if extend_meta and extend_meta.meta.converter:
+            try:
+                if conv := extend_meta.meta.converter.get(extend_obj.attrname):
+                    setattr(extend_obj, 'converter', conv())
+            except AttributeError:
+                raise AttributeError(
+                    'ExtendMeta converter attribute must be dict instance, '
+                    'where keys are fields names for which will be set converter.'
+                )
 
         if hasattr(opts, "extend_descriptor"):
             cls._set_descriptor_to_django_model_meta(model_cls)
