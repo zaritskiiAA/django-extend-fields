@@ -2,30 +2,61 @@ import types
 
 import pytest
 from django.utils.translation import override
-from django.conf import settings
 
-from extends import to_attribute
+from testapp.models import Question
 
 
 @pytest.mark.django_db(transaction=True)
 class TestTranslatedField:
 
     @pytest.mark.parametrize('attr', ('question', 'answer'))
-    def test_getter(self, obj_with_trans_field, attr):
+    def test_getter(self, model_obj, attr):
 
-        for code, _ in settings.LANGUAGES:
+        desc = getattr(Question, attr)
+
+        for code in desc.attr_suffix:
             with override(code):
                 assert not isinstance(
-                    getattr(obj_with_trans_field, attr, None), types.NoneType
+                    getattr(model_obj, attr, None), types.NoneType
                 ), f'Translated Field getter dont returned required attr {attr}'
 
     @pytest.mark.parametrize(
-        'attr, value', [('question', 'next_question'), ('answer', 'next_answer')]
+        'attr, method, input_data', [
+            ('question', 'create', 'hi'), ('question', 'update', 'hello')
+        ]
     )
-    def test_setter(self, obj_with_trans_field, attr, value):
+    def test_setter(self, attr, method, input_data, model_obj):
 
-        setattr(obj_with_trans_field, attr, value)
-
+        desc = getattr(Question, attr)
+        q = Question(**{attr: input_data})
+        if method == 'update':
+            q = model_obj
+            setattr(q, attr, input_data)
         assert (
-            getattr(obj_with_trans_field, to_attribute(attr)) == value
-        ), f'Tranlated Field setter dont set correct value {attr}, {value}'
+            getattr(q, desc.to_attribute(attr)) == input_data
+        ), f'Tranlated Field setter dont set correct value {attr}, {input_data}'
+
+    @pytest.mark.parametrize(
+        'method, attr, input_data, expect_result',
+            [
+                ('create', 'question', 'hello', ('hello', 'Здравствуйте', 'hallo')),
+                ('update', 'question', 'hello', ('hello', 'Здравствуйте', 'hallo')),
+            ],
+    )
+    def test_auto_translation(self, method, attr, input_data, expect_result, obj_with_trans_field):
+
+        desc = getattr(Question, attr)
+
+        if method == 'create':
+            q = Question(**{attr: input_data})
+        if method == 'update':
+            q = obj_with_trans_field
+            setattr(obj_with_trans_field, attr, input_data)
+
+            for expect, suf in zip(expect_result, desc.auto.suffix):
+                raw_field = desc.to_attribute(attr, suffix=suf)
+                result = getattr(q, raw_field, None)
+                assert result, f'Auto-translated work incorrect. Dont set required field {raw_field}' # noqa E501
+                assert result == expect, (
+                    f'Auto translated work incorrect expect {expect}, now {result}'
+                )
