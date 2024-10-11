@@ -9,7 +9,7 @@ class Question(models.Model):
 
     question = TranslatedField(
         models.CharField(_("question"), max_length=200),
-        auto=(get_translator, []),
+        auto=([], []),
     )
     answer = TranslatedField(
         models.CharField(_("answer"), max_length=200),
@@ -19,6 +19,7 @@ class Question(models.Model):
 
     class ExtendMeta(ExtendMetaBase):
         override_query = True
+        converter = {'question': get_translator}
 
     def __str__(self):
         return self.question

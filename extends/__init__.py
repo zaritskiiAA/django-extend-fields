@@ -9,9 +9,13 @@ else:
     from .opportunity import (  # noqa
         TextResultModel,
         DeeplTranslator,
-        get_translator,  # noqa
+        get_translator,
         LangsModel,
+        BatchLangsModel,
+        AWSLangsModel,
+        AWSBatchLangsModel,
         AWSLanguageDetector,
-        get_detector,  # noqa
+        get_detector,
     )
     from .validators import Validator  # noqa
+    from .exceptions import UndefinedMethodError  # noqa
