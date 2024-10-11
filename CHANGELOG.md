@@ -15,3 +15,7 @@
 
 - Добавлен определитель языка AWSLanguageDetector.
 - Добавлена возможность указывать авто транслятор как в параметре auto, так и в ExtendMeta.
+
+## [0.4.0] - 11.10.2024
+
+- Добавлен в AWSLanguageDetector новый прокси api метод batch_detect_languages
