@@ -21,13 +21,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Установка зависимостей
-        run: |
-          poetry install
-      - name: Запуск тестов.
-        with:
+        run: poetry install
+      - name: Запуск тестов
+        env:
           DEEPL_TRANSLATOR_KEY: ${{ secrets.DEEPL_TRANSLATOR_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        run: |
-          poetry run pytest
-        working-directory: .
+        run: poetry run pytest
