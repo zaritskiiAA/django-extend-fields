@@ -2,26 +2,26 @@
 
 Расширенные возможности *django fields*. :guitar:
 
-#### ~Содержание~
+#### *Содержание*
 1. [Проблемы, которые решает.](#problems)
 2. [Установка пакета.](#package)
 3. [Базовае использование.](#basic-usage)
 4. [ExtendField и дополнительные возможности](#extend-field-opportunity)
 5. [Dev запуск и тестирование.](#dev)
 
-<br><br>
+<br>
 
-1. Проблемы, которые решает <a id="problems"></a>
+### 1. Проблемы, которые решает <a id="problems"></a>
 
-    - Авто-генерация полей таблиц бд.
-    - Сохранение единого интерфейса нового функционала с django.
-    - Готовые *API* по авто-транслитированию/детектированию языков.
-    - Автоматизизация рутинных процессов связанных с django fields.
+- Авто-генерация полей таблиц бд.
+- Сохранение единого интерфейса нового функционала с django.
+- Готовые *API* по авто-транслитированию/детектированию языков.
+- Автоматизизация рутинных процессов связанных с django fields.
 
-2. Установка пакета <a id="package"></a>
-    __в процессе__
+### 2. ~~Установка пакета~~ <a id="package"></a>
+в процессе
 
-3. Базовае использование <a id="basic-usage"></a>
+### 3. Базовае использование <a id="basic-usage"></a>
 
 
 ```
@@ -73,7 +73,7 @@ q = Question.objects.create(question_en_us="hi") или Question(question_en_us=
 
 Более подробно про возможности TranslatedField в разделе 4. [ExtendField и дополнительные возможности](#extend-field-opportunity)
 
-4. ExtendField и дополнительные возможности <a id="extend-field-opportunity"></a> 
+### 4. ExtendField и дополнительные возможности <a id="extend-field-opportunity"></a> 
 
 #### TanslatedField
 
@@ -149,7 +149,7 @@ class ExtendMetaBase:
 
 ссылка на  [*Deepl API*](https://www.deepl.com/en/translator/q/es/tengo+hambre/en/I?utm_term=&utm_campaign=DE%7CPMAX%7CC%7CEnglish&utm_source=google&utm_medium=paid&hsa_acc=1083354268&hsa_cam=21575885684&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gad_source=1&gclid=Cj0KCQiAlsy5BhDeARIsABRc6Zsq1wGg6YnxI-_2afXPq3HylcAJW5zhz5_NVLFGhW0wYZpFjlKjFSIaAkRFEALw_wcB) 
 
-Для подключения *api* вам нужен `api key`, который при инициализации django будет помещен в переменные окружения, после достаточно использовать функцию `get_translator` для взаимодействия с транслятором.
+Для подключения *api* нужно получить `api key`, который при инициализации django будет помещен в переменные окружения, после достаточно использовать функцию `get_translator` для взаимодействия с транслятором.
 
 ```
 class TextResultModel(BaseModel):
@@ -167,10 +167,10 @@ class DeeplTranslator(TranslatorBase, ApiHandler):
 
 единственный внешний интерфейс транслятора `translate_text` отправляет запрос к deepl api и возвращает pydantic `TextResultModel`
 
-5. Dev запуск и тестирование. <a id="dev"></a>
-    - Установить [poetry](https://python-poetry.org/) если не установлен на локальную машину.
-    - Стянуть репозиторий __ssh__: ```git clone git@github.com:zaritskiiAA/django-extend-fields.git```
-    - стянуть зависимости и развернуть venv bash: ```poetry install```
-    - в директории с `manage.py` выполнить миграции bash: `poetry run python manage.py migrate`
-    - для локального запуска bash: `poetry run python manage.py run`
-    - для запуска тестов bash: `poetry run pytest`
+### 5. Dev запуск и тестирование. <a id="dev"></a>
+- Установить [poetry](https://python-poetry.org/) если не установлен на локальную машину.
+- Стянуть репозиторий __ssh__: ```git clone git@github.com:zaritskiiAA/django-extend-fields.git```
+- стянуть зависимости и развернуть venv bash: ```poetry install```
+- в директории с `manage.py` выполнить миграции bash: `poetry run python manage.py migrate`
+- для локального запуска bash: `poetry run python manage.py run`
+- для запуска тестов bash: `poetry run pytest`
