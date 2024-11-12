@@ -2,14 +2,13 @@
 
 Расширенные возможности *django fields*. :guitar:
 
-#### ~Содержание~
+#### *Содержание*
 1. [Проблемы, которые решает.](#problems)
 2. [Установка пакета.](#package)
 3. [Базовае использование.](#basic-usage)
 4. [ExtendField и дополнительные возможности](#extend-field-opportunity)
 5. [Dev запуск и тестирование.](#dev)
-
-<br><br>
+<br>
 
 1. Проблемы, которые решает <a id="problems"></a>
 
@@ -149,7 +148,7 @@ class ExtendMetaBase:
 
 ссылка на  [*Deepl API*](https://www.deepl.com/en/translator/q/es/tengo+hambre/en/I?utm_term=&utm_campaign=DE%7CPMAX%7CC%7CEnglish&utm_source=google&utm_medium=paid&hsa_acc=1083354268&hsa_cam=21575885684&hsa_grp=&hsa_ad=&hsa_src=x&hsa_tgt=&hsa_kw=&hsa_mt=&hsa_net=adwords&hsa_ver=3&gad_source=1&gclid=Cj0KCQiAlsy5BhDeARIsABRc6Zsq1wGg6YnxI-_2afXPq3HylcAJW5zhz5_NVLFGhW0wYZpFjlKjFSIaAkRFEALw_wcB) 
 
-Для подключения *api* вам нужен `api key`, который при инициализации django будет помещен в переменные окружения, после достаточно использовать функцию `get_translator` для взаимодействия с транслятором.
+Для подключения *api* нужно получить `api key`, который при инициализации django будет помещен в переменные окружения, после достаточно использовать функцию `get_translator` для взаимодействия с транслятором.
 
 ```
 class TextResultModel(BaseModel):
