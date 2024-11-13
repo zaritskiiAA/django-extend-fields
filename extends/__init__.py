@@ -4,7 +4,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     pass
 else:
-    from .fields import TranslatedField  # noqa
+    from .fields import TranslatedField, ResizeImageField  # noqa
     from .bases import ExtendField, ExtendMetaBase, ConverterMixin, AutoConvert  # noqa
     from .opportunity import (  # noqa
         TextResultModel,
