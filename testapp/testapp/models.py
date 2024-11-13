@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from extends import TranslatedField, ExtendMetaBase
+from extends import TranslatedField, ResizeImageField, ExtendMetaBase
 from extends.opportunity import get_translator
 
 
@@ -23,3 +23,11 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question
+
+
+class MediaModel(models.Model):
+
+    photo = ResizeImageField(models.ImageField(upload_to="photo/"), resolution=("320x240", "320x480", "800x600"))
+
+    class ExtendMeta(ExtendMetaBase):
+        override_query = True

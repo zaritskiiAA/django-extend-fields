@@ -36,7 +36,7 @@ LANGUAGES = [
 # models.py
 
 from django.utils.translation import gettext_lazy as _
-from extends import TranslatedField
+from extends import TranslatedField, ExtendMetaBase
 
 
 class Question(models.Model):
@@ -44,6 +44,9 @@ class Question(models.Model):
     question = TranslatedField(
         models.CharField(_("question"), max_length=200),
     )
+
+    class ExtendMeta(ExtendMetaBase):
+        override_query = True
 ```
 
 TranslatedField, сгенерирует поля таблице question  в соответствии с языками закрепленными в константе `LANGUAGES`
@@ -56,6 +59,7 @@ TranslatedField, сгенерирует поля таблице question  в с�
 
 Объект можно создать с помощью ООП `python` и  функционала `django`, например:
 
+если установлен `override_query` (перегружает `ModelBase` и object manager)
 ```
 q = Question(question="hi")
 q.save()
@@ -64,7 +68,8 @@ q.save()
 ```
 q = Question.objects.create(question="hi")
 ```
-или
+
+классический доступ к атрибутам, без `override_query`
 ```
 q = Question.objects.create(question_en_us="hi") или Question(question_en_us="hi")
 ```
